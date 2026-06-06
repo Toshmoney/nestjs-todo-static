@@ -1,5 +1,5 @@
-import { Controller } from '@nestjs/common';
-import { Body, Delete, Get, Param, Patch, Post, ParseIntPipe, ValidationPipe } from '@nestjs/common';
+import { Controller, Query } from '@nestjs/common';
+import { Body, Delete, Get, Param, Patch, Post, ParseIntPipe, ValidationPipe, ParseBoolPipe } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
@@ -14,8 +14,8 @@ export class TodosController {
     }
 
     @Get()
-    findAll() {
-        return this.todosService.findAll();
+    findAll(@Query('isCompleted', new ParseBoolPipe({ optional: true })) isCompleted?: boolean) {
+        return this.todosService.findAll(isCompleted);
     }
 
     @Get(':id')

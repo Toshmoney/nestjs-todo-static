@@ -1,15 +1,15 @@
-import { Injectable, NotFoundException} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 
 @Injectable()
 export class TodosService {
-    private todos: CreateTodoDto[] = [
+    private todos = [
         {
             id: 1,
             title: 'Buy groceries',
             description: 'Milk, Bread, Cheese',
-            isCompleted: false
+            isCompleted: true
         },
         {
             id: 2,
@@ -34,11 +34,26 @@ export class TodosService {
         return newTodo;
     }
 
-    findAll(isCompleted?: boolean) {
-        if (isCompleted !== undefined) {
-            return this.todos.filter(todo => todo.isCompleted === isCompleted);
+    findAll(isCompleted?: boolean | string) {
+        if (isCompleted === undefined || isCompleted === null || isCompleted === '') {
+            return this.todos;
         }
-        return this.todos;
+
+        // Convert string inputs ("true" or "false") into actual booleans
+        let completedBool: boolean;
+        
+        if (typeof isCompleted === 'string') {
+            if (isCompleted === 'true') completedBool = true;
+            else if (isCompleted === 'false') completedBool = false;
+            else {
+                // Throws a 400 Bad Request if the string is not "true" or "false"
+                throw new BadRequestException('Invalid query parameter: isCompleted must be "true" or "false"');
+            }
+        } else {
+            completedBool = isCompleted;
+        }
+
+        return this.todos.filter(todo => todo.isCompleted === completedBool);
     }
 
     findOne(id: number) {
